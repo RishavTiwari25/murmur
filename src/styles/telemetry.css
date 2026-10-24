@@ -1,0 +1,34 @@
+.murmur-token-meter {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgb(16 14 25 / 70%);
+  color: var(--muted);
+  padding: 0 9px;
+  font-family: var(--font-mono);
+}
+
+.murmur-token-meter > span {
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.murmur-token-meter > small { color: var(--subtle); font-size: 8px; }
+.murmur-token-meter.is-live { border-color: rgb(103 232 249 / 28%); color: var(--cyan); }
+.murmur-token-meter.is-live svg { animation: murmur-live-pulse 1.4s ease-in-out infinite; }
+
+@media (max-width: 720px) {
+  .murmur-token-meter > small { display: none; }
+}
+
+@media (max-width: 560px) {
+  .murmur-token-meter { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .murmur-token-meter.is-live svg { animation: none; }
+}
