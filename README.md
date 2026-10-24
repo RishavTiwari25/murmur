@@ -427,5 +427,3 @@ the local setup and the checks CI runs. Vulnerabilities go through
 [SECURITY.md](SECURITY.md), privately, rather than a public issue.
 
 ---
-
-Originally built by Anshu Aman (mightbeanshuu); forked, extended and deployed by Rishav Tiwari.
