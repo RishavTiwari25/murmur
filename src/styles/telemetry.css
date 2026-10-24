@@ -5,7 +5,7 @@
   gap: 6px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgb(16 14 25 / 70%);
+  background: rgb(14 19 23 / 70%);
   color: var(--muted);
   padding: 0 9px;
   font-family: var(--font-mono);
@@ -18,7 +18,7 @@
 }
 
 .murmur-token-meter > small { color: var(--subtle); font-size: 8px; }
-.murmur-token-meter.is-live { border-color: rgb(103 232 249 / 28%); color: var(--cyan); }
+.murmur-token-meter.is-live { border-color: rgb(125 211 252 / 28%); color: var(--cyan); }
 .murmur-token-meter.is-live svg { animation: murmur-live-pulse 1.4s ease-in-out infinite; }
 
 @media (max-width: 720px) {

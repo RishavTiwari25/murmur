@@ -32,9 +32,9 @@
 
 .murmur-auth-video .murmur-relay-media::after {
   background:
-    linear-gradient(90deg, rgb(8 7 13 / 14%), rgb(8 7 13 / 42%) 82%, rgb(8 7 13 / 88%)),
-    linear-gradient(180deg, rgb(8 7 13 / 24%), rgb(8 7 13 / 58%)),
-    radial-gradient(circle at 48% 58%, transparent 8%, rgb(8 7 13 / 36%) 76%);
+    linear-gradient(90deg, rgb(7 10 12 / 14%), rgb(7 10 12 / 42%) 82%, rgb(7 10 12 / 88%)),
+    linear-gradient(180deg, rgb(7 10 12 / 24%), rgb(7 10 12 / 58%)),
+    radial-gradient(circle at 48% 58%, transparent 8%, rgb(7 10 12 / 36%) 76%);
 }
 
 .murmur-auth-video .murmur-relay-media video {
@@ -149,7 +149,7 @@
   align-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: rgb(16 14 25 / 88%);
+  background: rgb(14 19 23 / 88%);
   color: var(--accent);
   padding: 12px;
 }
@@ -211,7 +211,7 @@
   justify-content: center;
   flex-direction: column;
   padding: clamp(24px, 5vw, 72px);
-  background: rgb(9 8 14 / 48%);
+  background: rgb(8 11 13 / 48%);
 }
 
 .murmur-auth-entry::before {
@@ -219,7 +219,7 @@
   width: min(70vw, 500px);
   height: min(70vw, 500px);
   border-radius: 50%;
-  background: rgb(91 60 174 / 13%);
+  background: rgb(13 148 136 / 13%);
   content: "";
   filter: blur(80px);
   pointer-events: none;
@@ -230,7 +230,7 @@
   width: min(100%, 440px);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: rgb(16 14 25 / 88%);
+  background: rgb(14 19 23 / 88%);
   padding: clamp(22px, 3vw, 32px);
 }
 
@@ -364,7 +364,7 @@
   width: min(100%, 440px);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: rgb(6 6 11 / 82%);
+  background: rgb(5 8 9 / 82%);
   margin-top: 18px;
   overflow: hidden;
 }

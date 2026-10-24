@@ -73,7 +73,7 @@
 }
 
 .murmur-deliverable-dialog::backdrop {
-  background: rgb(4 3 8 / 80%);
+  background: rgb(3 5 6 / 80%);
   backdrop-filter: blur(12px);
 }
 
@@ -83,7 +83,7 @@
   min-height: 0;
   flex-direction: column;
   background:
-    radial-gradient(720px 320px at 50% -20%, rgb(91 60 174 / 15%), transparent 72%),
+    radial-gradient(720px 320px at 50% -20%, rgb(13 148 136 / 15%), transparent 72%),
     var(--canvas);
 }
 
@@ -95,7 +95,7 @@
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid var(--line);
-  background: rgb(16 14 25 / 92%);
+  background: rgb(14 19 23 / 92%);
   padding: 10px 16px;
 }
 
@@ -286,7 +286,7 @@
 @media print {
   @page { size: A4; margin: 16mm; }
 
-  body { overflow: visible !important; background: #f6f3ff !important; }
+  body { overflow: visible !important; background: #f2f8f7 !important; }
   body * { visibility: hidden !important; }
   .murmur-deliverable-dialog,
   .murmur-deliverable-dialog * { visibility: visible !important; }
@@ -297,10 +297,10 @@
     height: auto !important;
     overflow: visible !important;
     border: 0 !important;
-    background: #f6f3ff !important;
-    color: #171322 !important;
+    background: #f2f8f7 !important;
+    color: #141b20 !important;
   }
-  .murmur-deliverable-reader { height: auto !important; background: #f6f3ff !important; }
+  .murmur-deliverable-reader { height: auto !important; background: #f2f8f7 !important; }
   .murmur-deliverable-reader-head { display: none !important; }
   .murmur-deliverable-reader-scroll { overflow: visible !important; padding: 0 !important; }
   .murmur-deliverable-document { width: 100% !important; }
@@ -308,11 +308,11 @@
   .murmur-deliverable-reader .murmur-md strong,
   .murmur-deliverable-reader .murmur-md h1,
   .murmur-deliverable-reader .murmur-md h2,
-  .murmur-deliverable-reader .murmur-md h3 { color: #171322 !important; }
+  .murmur-deliverable-reader .murmur-md h3 { color: #141b20 !important; }
   .murmur-deliverable-reader .murmur-md table { display: table; overflow: visible; }
-  .murmur-deliverable-reader .murmur-md th { background: #e1dbea !important; }
+  .murmur-deliverable-reader .murmur-md th { background: #dbe5e4 !important; }
   .murmur-deliverable-reader .murmur-md th,
-  .murmur-deliverable-reader .murmur-md td { min-width: 0; border-color: #aaa1b9 !important; }
+  .murmur-deliverable-reader .murmur-md td { min-width: 0; border-color: #9fb0b3 !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

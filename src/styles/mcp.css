@@ -5,7 +5,7 @@
   gap: 7px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgb(16 14 25 / 70%);
+  background: rgb(14 19 23 / 70%);
   color: var(--muted);
   cursor: pointer;
   padding: 0 10px;
@@ -33,7 +33,7 @@
   max-height: min(780px, calc(100svh - 32px));
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
-  background: #100e19;
+  background: #0e1317;
   color: var(--text);
   margin: auto;
   padding: 0;
@@ -41,7 +41,7 @@
 }
 
 .murmur-mcp-dialog::backdrop {
-  background: rgb(4 3 8 / 78%);
+  background: rgb(3 5 6 / 78%);
   backdrop-filter: blur(8px);
 }
 
@@ -68,7 +68,7 @@
   place-items: center;
   border-radius: 10px;
   background: var(--accent-soft);
-  color: #cbbcff;
+  color: #99f6e4;
 }
 
 .murmur-mcp-head > div { min-width: 0; }
@@ -183,7 +183,7 @@
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #110b1d;
+  color: #0b1316;
   cursor: pointer;
   font-size: 10px;
   font-weight: 780;
@@ -191,7 +191,7 @@
 
 .murmur-mcp-primary { display: inline-flex; min-width: 108px; align-items: center; justify-content: center; gap: 7px; margin-left: auto; }
 .murmur-mcp-primary:hover:not(:disabled),
-.murmur-mcp-done:hover { background: #cbbcff; }
+.murmur-mcp-done:hover { background: #99f6e4; }
 .murmur-mcp-primary:disabled { cursor: wait; opacity: 0.6; }
 
 .murmur-mcp-credential {
@@ -210,7 +210,7 @@
 .murmur-mcp-credential dd { margin: 0; color: var(--text); font-size: 9px; white-space: nowrap; }
 
 .murmur-mcp-secret {
-  border: 1px solid rgb(103 232 249 / 34%);
+  border: 1px solid rgb(125 211 252 / 34%);
   border-radius: var(--radius-sm);
   background: rgb(16 43 51 / 45%);
   padding: 11px;

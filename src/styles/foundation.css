@@ -1,25 +1,25 @@
 :root {
-  --canvas: #08070d;
-  --canvas-raised: #0c0a12;
-  --surface: #100e19;
-  --surface-raised: #171322;
-  --surface-active: #201a31;
-  --line: #2b253a;
-  --line-strong: #4a3e65;
-  --ink: #f6f3ff;
-  --text: #e1dbea;
-  --muted: #aaa1b9;
-  --subtle: #8f859f;
-  --accent: #a78bfa;
-  --accent-strong: #8b5cf6;
-  --accent-soft: #2b2049;
-  --cyan: #67e8f9;
-  --cyan-soft: #102b33;
+  --canvas: #070a0c;
+  --canvas-raised: #0a0e11;
+  --surface: #0e1317;
+  --surface-raised: #141b20;
+  --surface-active: #1a252b;
+  --line: #24303a;
+  --line-strong: #3c5160;
+  --ink: #f2f8f7;
+  --text: #dbe5e4;
+  --muted: #9fb0b3;
+  --subtle: #82959a;
+  --accent: #2dd4bf;
+  --accent-strong: #14b8a6;
+  --accent-soft: #0f2f2c;
+  --cyan: #7dd3fc;
+  --cyan-soft: #0c2533;
   --success: #6ee7b7;
   --warning: #fbbf24;
   --danger: #fda4af;
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-sans: var(--font-brand-sans), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-brand-mono), "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -42,7 +42,7 @@ body {
 body {
   margin: 0;
   background:
-    radial-gradient(900px 520px at 13% -10%, rgb(91 60 174 / 24%), transparent 62%),
+    radial-gradient(900px 520px at 13% -10%, rgb(13 148 136 / 24%), transparent 62%),
     radial-gradient(720px 460px at 94% 112%, rgb(14 116 144 / 15%), transparent 62%),
     var(--canvas);
   color: var(--text);
@@ -85,7 +85,7 @@ textarea:focus-visible {
 }
 
 ::selection {
-  background: rgb(167 139 250 / 32%);
+  background: rgb(45 212 191 / 32%);
   color: var(--ink);
 }
 
@@ -98,14 +98,14 @@ textarea:focus-visible {
   border: 0;
   border-radius: 10px;
   background: var(--accent);
-  color: #110b1d;
+  color: #0b1316;
   cursor: pointer;
   font-weight: 760;
   transition: background 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 
 .murmur-primary-button:hover:not(:disabled) {
-  background: #cbbcff;
+  background: #99f6e4;
   transform: translateY(-1px);
 }
 
@@ -137,7 +137,7 @@ textarea:focus-visible {
 
 .murmur-mark {
   flex: 0 0 auto;
-  filter: drop-shadow(0 0 10px rgb(167 139 250 / 23%));
+  filter: drop-shadow(0 0 10px rgb(45 212 191 / 23%));
 }
 
 .murmur-brand-copy {
@@ -202,3 +202,40 @@ details[open] > summary svg:last-child {
     transition-duration: 1ms !important;
   }
 }
+
+/* Author signature (app footer + sign-in page). */
+.murmur-signature {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.murmur-signature a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 160ms var(--ease-out);
+}
+
+.murmur-signature a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.murmur-signature .murmur-signature-repo {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.murmur-signature .murmur-signature-repo:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+
+.murmur-signature.is-app { margin-top: -6px; }
+.murmur-signature.is-auth { position: relative; margin-top: 18px; }

@@ -5,6 +5,8 @@ import { BillingControls } from "@/components/BillingControls";
 import { McpConnection } from "@/components/McpConnection";
 import { LiveTokenMeter } from "@/components/LiveTokenMeter";
 import { NewSwarmButton } from "@/components/NewSwarmButton";
+import { AuthorSignature } from "@/components/AuthorSignature";
+import { AUTHOR } from "@/lib/author";
 import { auth } from "@/lib/auth";
 import { getUserPlan } from "@/lib/billing/repository";
 import { isBillingEnabled } from "@/lib/billing/stripe";
@@ -46,7 +48,7 @@ export default async function Home({
           <a
             aria-label="View Murmur source on GitHub"
             className="murmur-icon-link"
-            href="https://github.com/RishavTiwari25/murmur"
+            href={AUTHOR.repoUrl}
             target="_blank"
             rel="noreferrer"
           >
@@ -70,6 +72,10 @@ export default async function Home({
       ) : null}
 
       <Workspace userName={session.user.name} />
+
+      <footer>
+        <AuthorSignature className="is-app" />
+      </footer>
     </main>
   );
 }

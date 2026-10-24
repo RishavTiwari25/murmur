@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Turn one complex goal into a live, durable, validated agent swarm: plan, delegate, execute, validate, synthesize.",
   "private": true,
+  "author": "Rishav Tiwari <rishavt413@gmail.com> (https://github.com/RishavTiwari25)",
+  "homepage": "https://github.com/RishavTiwari25/murmur#readme",
+  "bugs": "https://github.com/RishavTiwari25/murmur/issues",
   "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "next dev",

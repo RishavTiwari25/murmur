@@ -10,8 +10,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgb(8 7 13 / 28%), rgb(8 7 13 / 58%)),
-    radial-gradient(circle at 50% 45%, transparent 18%, rgb(8 7 13 / 48%) 72%);
+    linear-gradient(180deg, rgb(7 10 12 / 28%), rgb(7 10 12 / 58%)),
+    radial-gradient(circle at 50% 45%, transparent 18%, rgb(7 10 12 / 48%) 72%);
   content: "";
 }
 

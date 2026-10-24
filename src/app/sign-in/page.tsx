@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { AuthForm } from "@/components/AuthForm";
 import { AuthSwarmGraph } from "@/components/AuthSwarmGraph";
 import { AmbientRelayVideo } from "@/components/AmbientRelayVideo";
+import { AuthorSignature } from "@/components/AuthorSignature";
+import { AUTHOR } from "@/lib/author";
 import { auth } from "@/lib/auth";
 import { isBillingEnabled } from "@/lib/billing/stripe";
 import { MurmurBrand } from "@/components/ui/Brand";
@@ -34,7 +36,7 @@ export default async function SignInPage() {
           <MurmurBrand tagline="Live agent swarm orchestration" />
           <a
             className="murmur-auth-source"
-            href="https://github.com/RishavTiwari25/murmur"
+            href={AUTHOR.repoUrl}
             target="_blank"
             rel="noreferrer"
           >
@@ -70,6 +72,7 @@ export default async function SignInPage() {
         <p className="murmur-auth-footnote">
           Secure sessions powered by Better Auth.{isBillingEnabled() ? " Payments stay on Stripe." : ""}
         </p>
+        <AuthorSignature className="is-auth" />
         <aside className="murmur-auth-terminal" aria-label="Connect Codex or Claude Code through MCP">
           <header>
             <span className="murmur-terminal-lights" aria-hidden="true"><i /><i /><i /></span>

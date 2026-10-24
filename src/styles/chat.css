@@ -7,7 +7,7 @@
   gap: 3px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: rgb(8 7 13 / 72%);
+  background: rgb(7 10 12 / 72%);
   padding: 3px;
 }
 
@@ -44,7 +44,7 @@
   gap: 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
-  background: rgb(16 14 25 / 90%);
+  background: rgb(14 19 23 / 90%);
   padding: 18px;
   backdrop-filter: blur(18px) saturate(112%);
 }

@@ -73,7 +73,7 @@ function layout(agents: Record<string, AgentNode>): Record<string, { x: number; 
 }
 
 const EDGE_COLOR: Record<string, string> = {
-  assign: "#a78bfa",
+  assign: "#2dd4bf",
   depends: "#64748b",
   review: "#fb7185",
   revise: "#f59e0b",
@@ -134,8 +134,8 @@ export function SwarmGraph() {
             label: e.label,
             animated: liveTarget,
             style: { stroke: color, strokeWidth: liveTarget ? 2 : 1.2, opacity: 0.8 },
-            labelStyle: { fill: "#aaa1b9", fontSize: 10 },
-            labelBgStyle: { fill: "#0b0b14", fillOpacity: 0.7 },
+            labelStyle: { fill: "#9fb0b3", fontSize: 10 },
+            labelBgStyle: { fill: "#081013", fillOpacity: 0.7 },
             markerEnd: { type: MarkerType.ArrowClosed, color },
           };
         }),
@@ -268,7 +268,7 @@ export function SwarmGraph() {
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
         >
-          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#29233f" />
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#1f2c33" />
           <Controls showInteractive={false} />
         </ReactFlow>
         {rfNodes.length === 0 ? (

@@ -33,8 +33,8 @@
 .murmur-onboarding-media {
   z-index: -3;
   background:
-    radial-gradient(580px 280px at 50% 46%, rgb(55 48 110 / 34%), transparent 72%),
-    linear-gradient(150deg, rgb(20 17 34 / 88%), rgb(8 7 13 / 96%));
+    radial-gradient(580px 280px at 50% 46%, rgb(15 90 84 / 34%), transparent 72%),
+    linear-gradient(150deg, rgb(20 17 34 / 88%), rgb(7 10 12 / 96%));
 }
 
 .murmur-onboarding-media > video {
@@ -47,8 +47,8 @@
 .murmur-onboarding-scrim {
   z-index: -2;
   background:
-    linear-gradient(180deg, rgb(8 7 13 / 44%), rgb(8 7 13 / 74%)),
-    radial-gradient(circle at 50% 42%, transparent 20%, rgb(8 7 13 / 64%) 86%);
+    linear-gradient(180deg, rgb(7 10 12 / 44%), rgb(7 10 12 / 74%)),
+    radial-gradient(circle at 50% 42%, transparent 20%, rgb(7 10 12 / 64%) 86%);
 }
 
 .murmur-onboarding-content {
@@ -99,7 +99,7 @@
 .murmur-goalbar.is-onboarding {
   width: 100%;
   border-color: var(--line-strong);
-  background: rgb(16 14 25 / 90%);
+  background: rgb(14 19 23 / 90%);
   padding: 14px;
   backdrop-filter: blur(18px) saturate(112%);
 }
@@ -277,7 +277,7 @@
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #110b1d;
+  color: #0b1316;
   cursor: pointer;
   padding: 0 12px;
   font-size: 10px;
@@ -406,7 +406,7 @@
 
 .murmur-mode-selector input:checked + span {
   background: var(--accent-soft);
-  color: #cbbcff;
+  color: #99f6e4;
 }
 
 .murmur-mode-selector input:focus-visible + span {
@@ -493,7 +493,7 @@
   gap: 5px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgb(16 14 25 / 76%);
+  background: rgb(14 19 23 / 76%);
   color: var(--text);
   cursor: pointer;
   padding: 9px 11px;
