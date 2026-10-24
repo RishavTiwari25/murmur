@@ -803,3 +803,14 @@
   .murmur-system-popover { position: fixed; top: 64px; right: 10px; left: 10px; width: auto; }
   .murmur-user-popover { position: fixed; top: 64px; right: 10px; width: min(260px, calc(100vw - 20px)); }
 }
+
+.murmur-system-off {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border: 1.5px dashed var(--muted);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.murmur-system-popover li small.is-disabled { color: var(--muted); font-style: italic; }

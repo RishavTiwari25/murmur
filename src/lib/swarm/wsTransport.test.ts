@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  configuredWebSocketUrl,
   MAX_SOCKET_ATTEMPTS,
   openRunSocketLane,
   retryDelayMs,
@@ -19,6 +20,18 @@ class FakeSocket implements RunSocket {
   constructor(readonly url: string) {}
   close() {}
 }
+
+describe("configuredWebSocketUrl", () => {
+  it("returns null (SSE only) when NEXT_PUBLIC_TELEMETRY_WS_URL is unset or blank", () => {
+    vi.stubEnv("NEXT_PUBLIC_TELEMETRY_WS_URL", "");
+    expect(configuredWebSocketUrl()).toBeNull();
+    vi.stubEnv("NEXT_PUBLIC_TELEMETRY_WS_URL", "   ");
+    expect(configuredWebSocketUrl()).toBeNull();
+    vi.stubEnv("NEXT_PUBLIC_TELEMETRY_WS_URL", " wss://telemetry.example.com/ws ");
+    expect(configuredWebSocketUrl()).toBe("wss://telemetry.example.com/ws");
+    vi.unstubAllEnvs();
+  });
+});
 
 describe("runSocketUrl", () => {
   it("adds the runId filter the telemetry hub subscribes with", () => {

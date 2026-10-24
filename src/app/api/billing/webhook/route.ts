@@ -1,9 +1,15 @@
 import { processStripeEvent, verifyStripeWebhook } from "@/lib/billing/service";
+import { billingDisabledResponse, isBillingEnabled } from "@/lib/billing/stripe";
 import { readBodyBytes, requestErrorResponse } from "@/lib/http/request";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  // Without Stripe configured there is nothing to verify against. Answer
+  // cleanly instead of throwing so a stray delivery never surfaces as a 500.
+  if (!isBillingEnabled() || !process.env.STRIPE_WEBHOOK_SECRET?.trim()) {
+    return billingDisabledResponse();
+  }
   const signature = req.headers.get("stripe-signature");
   if (!signature) return Response.json({ error: "Missing Stripe signature." }, { status: 400 });
 

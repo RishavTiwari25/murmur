@@ -1,10 +1,12 @@
 import { getRequestSession } from "@/lib/auth";
 import { startProCheckout } from "@/lib/billing/service";
+import { billingDisabledResponse, isBillingEnabled } from "@/lib/billing/stripe";
 import { hasTrustedOrigin } from "@/lib/http/request";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  if (!isBillingEnabled()) return billingDisabledResponse();
   const session = await getRequestSession(req);
   if (!session) return Response.json({ error: "Authentication required." }, { status: 401 });
   if (!hasTrustedOrigin(req)) return Response.json({ error: "Origin not allowed." }, { status: 403 });

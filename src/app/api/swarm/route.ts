@@ -1,5 +1,6 @@
 import {
   assertInfrastructureReady,
+  dependencyState,
   InfrastructureUnavailableError,
 } from "@/lib/swarm/infrastructure";
 import { enforceRunRateLimit, rateLimitKey, RateLimitError } from "@/lib/swarm/rateLimit";
@@ -54,8 +55,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Redis and Kafka are both part of the run contract. A launch is rejected
-    // if either durable event dependency is unavailable.
+    // Redis is the run contract's only hard dependency. Kafka is an optional
+    // mirror and is reported as "disabled" when it is not configured.
     await assertInfrastructureReady();
   } catch (error) {
     const health = error instanceof InfrastructureUnavailableError ? error.health : undefined;
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
       JSON.stringify({
         error: "Required swarm infrastructure is unavailable.",
         dependencies: health
-          ? { kafka: health.kafka.ok ? "up" : "down", redis: health.redis.ok ? "up" : "down" }
+          ? { kafka: dependencyState(health.kafka), redis: dependencyState(health.redis) }
           : undefined,
       }),
       {

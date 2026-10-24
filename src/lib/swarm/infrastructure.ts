@@ -2,6 +2,7 @@ import {
   getInfrastructureHealthCacheMs,
   getKafkaProbeTimeoutMs,
   InfrastructureConfigError,
+  isKafkaEnabled,
 } from "./config";
 import { pingKafka } from "./kafka";
 import { pingRedis } from "./redis";
@@ -9,7 +10,23 @@ import { pingRedis } from "./redis";
 export interface DependencyHealth {
   ok: boolean;
   latencyMs: number;
+  /** True when the dependency is intentionally not configured for this deployment. */
+  disabled?: boolean;
   error?: string;
+}
+
+/** Health reported for an optional dependency that is not configured. */
+export const DISABLED_DEPENDENCY: DependencyHealth = Object.freeze({
+  ok: false,
+  latencyMs: 0,
+  disabled: true,
+});
+
+export type DependencyState = "up" | "down" | "disabled";
+
+export function dependencyState(dependency: DependencyHealth): DependencyState {
+  if (dependency.disabled) return "disabled";
+  return dependency.ok ? "up" : "down";
 }
 
 export interface InfrastructureHealth {
@@ -62,6 +79,12 @@ function withTimeout(work: Promise<void>, timeoutMs: number) {
   });
 }
 
+/** Test hook: forget the cached probe result. */
+export function resetInfrastructureHealthCache() {
+  cached = null;
+  inFlight = null;
+}
+
 export async function getInfrastructureHealth(options: { force?: boolean } = {}) {
   const now = Date.now();
   if (!options.force && cached && cached.expiresAt > now) return cached.value;
@@ -69,7 +92,9 @@ export async function getInfrastructureHealth(options: { force?: boolean } = {})
   if (inFlight) return inFlight;
 
   inFlight = Promise.all([
-    checkDependency(pingKafka, getKafkaProbeTimeoutMs()),
+    isKafkaEnabled()
+      ? checkDependency(pingKafka, getKafkaProbeTimeoutMs())
+      : Promise.resolve({ ...DISABLED_DEPENDENCY }),
     checkDependency(pingRedis),
   ])
     .then(([kafka, redis]) => {

@@ -1,5 +1,6 @@
-import { getInfrastructureHealth } from "@/lib/swarm/infrastructure";
+import { DISABLED_DEPENDENCY, getInfrastructureHealth } from "@/lib/swarm/infrastructure";
 import { pingDatabase } from "@/lib/database";
+import { buildHealthReport } from "@/lib/healthReport";
 import { getExecutionMode, pingTemporal } from "@/lib/temporal/client";
 
 export const runtime = "nodejs";
@@ -10,34 +11,24 @@ export async function GET() {
   const [health, postgres, temporal] = await Promise.all([
     getInfrastructureHealth({ force: true }),
     check(pingDatabase),
-    executionMode === "temporal" ? check(pingTemporal) : Promise.resolve({ ok: true, latencyMs: 0 }),
+    executionMode === "temporal" ? check(pingTemporal) : Promise.resolve({ ...DISABLED_DEPENDENCY }),
   ]);
-  // Kafka only mirrors run events to downstream consumers, so its absence is
-  // reported as "degraded" rather than failing the probe: the product still
-  // serves runs, and an uptime check should not page for lost telemetry.
-  const ready = health.ok && postgres.ok && temporal.ok;
-  const degraded = ready && !health.kafka.ok;
-  return Response.json(
-    {
-      status: ready ? (degraded ? "degraded" : "ready") : "not_ready",
-      executionMode,
-      checkedAt: new Date(health.checkedAt).toISOString(),
-      dependencies: {
-        kafka: {
-          ok: health.kafka.ok,
-          required: false,
-          latencyMs: health.kafka.latencyMs,
-        },
-        redis: { ok: health.redis.ok, required: true, latencyMs: health.redis.latencyMs },
-        postgres,
-        temporal,
-      },
-    },
-    {
-      status: ready ? 200 : 503,
-      headers: { "cache-control": "no-store" },
-    },
-  );
+  // Kafka only mirrors run events to downstream consumers. When it is not
+  // configured it is reported as "disabled"; when configured but unreachable
+  // the probe is "degraded" rather than failing, so uptime checks do not page
+  // for lost telemetry.
+  const report = buildHealthReport({
+    executionMode,
+    checkedAt: health.checkedAt,
+    kafka: health.kafka,
+    redis: health.redis,
+    postgres,
+    temporal,
+  });
+  return Response.json(report, {
+    status: report.status === "not_ready" ? 503 : 200,
+    headers: { "cache-control": "no-store" },
+  });
 }
 
 async function check(probe: () => Promise<void>) {

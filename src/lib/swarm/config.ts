@@ -138,6 +138,17 @@ function azureEventHubsConfig(): KafkaInfrastructureConfig | null {
   };
 }
 
+/**
+ * Kafka is an optional downstream mirror. It is enabled only when a broker list
+ * (or an Azure Event Hubs connection string) is configured; otherwise Murmur
+ * never constructs a Kafka client and Redis remains the only event store.
+ */
+export function isKafkaEnabled() {
+  return Boolean(
+    process.env.KAFKA_BROKERS?.trim() || process.env.AZURE_EVENTHUBS_CONNECTION_STRING?.trim(),
+  );
+}
+
 export function getKafkaConfig(): KafkaInfrastructureConfig {
   const azure = azureEventHubsConfig();
   if (azure) return azure;

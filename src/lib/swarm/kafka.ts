@@ -1,5 +1,5 @@
 import { Kafka, logLevel, type Producer } from "kafkajs";
-import { getKafkaConfig } from "./config";
+import { getKafkaConfig, isKafkaEnabled } from "./config";
 import type { SwarmEventEnvelope } from "./session";
 
 let kafkaClient: Kafka | null = null;
@@ -48,7 +48,12 @@ function getProducer() {
   return producerPromise;
 }
 
-export async function publishSwarmEvent(envelope: SwarmEventEnvelope) {
+/**
+ * Mirrors an event to Kafka. Returns false without touching the network when
+ * Kafka is not configured, so minimal deployments never attempt a connection.
+ */
+export async function publishSwarmEvent(envelope: SwarmEventEnvelope): Promise<boolean> {
+  if (!isKafkaEnabled()) return false;
   const producer = await getProducer();
   const { topic, requestTimeoutMs } = getKafkaConfig();
 
@@ -69,6 +74,7 @@ export async function publishSwarmEvent(envelope: SwarmEventEnvelope) {
       },
     ],
   });
+  return true;
 }
 
 /** Checks broker connectivity and verifies that the required topic exists. */

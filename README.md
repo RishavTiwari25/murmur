@@ -145,6 +145,11 @@ pnpm temporal:worker       # run in a second terminal
 pnpm dev                   # http://localhost:3000
 ```
 
+`.env.example` defaults to the minimal stack (`MURMUR_EXECUTION_MODE=direct`, no
+Kafka, SSE only), which only needs Postgres and Redis from `pnpm infra:up`. For the
+full local stack set `MURMUR_EXECUTION_MODE=temporal`, uncomment `KAFKA_BROKERS`
+and set `NEXT_PUBLIC_TELEMETRY_WS_URL=ws://localhost:9091/ws`.
+
 Generate an auth secret with `openssl rand -base64 32`.
 
 Local services:
@@ -163,6 +168,10 @@ Local services:
 `pnpm infra:full` builds and starts the Temporal Worker too. It requires a populated `.env.local` because the Worker calls OpenRouter.
 
 ## Pro payments
+
+Stripe is optional. Without `STRIPE_SECRET_KEY` and `STRIPE_PRO_PRICE_ID` the
+upgrade button is hidden, `/api/billing/*` answers `503 {"billing":"disabled"}`,
+and every account stays on the free plan with the free-tier rate limits.
 
 Murmur uses Stripe-hosted surfaces so card data never enters this application:
 
@@ -300,9 +309,11 @@ PATH="$PATH:$(go env GOPATH)/bin" protoc --proto_path=proto \
   proto/telemetry/v1/telemetry.proto
 ```
 
-Kafka is a required part of the run contract. Murmur refuses new runs when either
-Kafka or Redis is unavailable, and an unacknowledged Kafka event fails the run
-instead of silently degrading to a Redis-only path.
+Kafka is optional. Redis is the only event store a run needs: when
+`KAFKA_BROKERS` is unset Murmur never opens a Kafka connection, `/api/health`
+reports Kafka as `disabled`, and the browser streams over SSE. When Kafka is
+configured but unreachable, publishes are logged and skipped and health reports
+`degraded`; runs still succeed.
 
 ## Repository layout
 
@@ -341,7 +352,41 @@ Temporal durably accepts a run and allows the Worker to live outside Vercel/Next
 
 ## Deployment
 
-Vercel can host the Next.js web adapter, but it cannot host the continuously polling Temporal Worker or Go consumer. A real deployment needs:
+### Minimal deployment (Vercel + Neon + Upstash)
+
+The cheapest working deployment is the Next.js app alone on Vercel, running swarms
+in-process. Kafka, Stripe, Temporal and the Go telemetry service are all optional.
+
+| Variable | Value |
+| --- | --- |
+| `OPENROUTER_API_KEY` | your OpenRouter key |
+| `DATABASE_URL` | Neon connection string (`postgresql://...?sslmode=require`) |
+| `REDIS_URL` | Upstash Redis TLS URL (`rediss://default:<token>@<host>:6379`) |
+| `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | `https://<your-app>.vercel.app` |
+| `APP_URL` | `https://<your-app>.vercel.app` |
+| `MURMUR_EXECUTION_MODE` | `direct` |
+
+Steps:
+
+1. Import the repository into Vercel and set the variables above for Production.
+2. Keep the build command `pnpm vercel-build`. On Production it validates exactly
+   these variables, runs the idempotent `pnpm db:migrate`, then `next build`.
+3. Leave `KAFKA_BROKERS`, `STRIPE_*` and `NEXT_PUBLIC_TELEMETRY_WS_URL` unset. The
+   app then streams runs over SSE, reports Kafka as `disabled` in `/api/health` and
+   the status menu, hides billing, and keeps every user on the free tier.
+
+Optional features switch on when their variables are present, and are validated
+only then: setting `KAFKA_BROKERS` requires `KAFKA_SWARM_EVENTS_TOPIC`, `KAFKA_SSL=1`,
+`KAFKA_SASL_MECHANISM`, `KAFKA_USERNAME` and `KAFKA_PASSWORD`; setting any `STRIPE_*`
+key requires `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID` and `STRIPE_WEBHOOK_SECRET`.
+
+Direct mode runs the whole swarm inside one Vercel Function, so long Max-mode runs
+are bounded by the function duration limit.
+
+### Full deployment
+
+Vercel can host the Next.js web adapter, but it cannot host the continuously polling Temporal Worker or Go consumer. The full topology needs:
 
 - Vercel for Next.js;
 - managed PostgreSQL, Redis, Kafka, and Temporal Cloud/self-hosted Temporal;
@@ -364,3 +409,7 @@ MIT. See [LICENSE](LICENSE).
 Bug reports and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) has
 the local setup and the checks CI runs. Vulnerabilities go through
 [SECURITY.md](SECURITY.md), privately, rather than a public issue.
+
+---
+
+Originally built by Anshu Aman (mightbeanshuu); forked, extended and deployed by Rishav Tiwari.

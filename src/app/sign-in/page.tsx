@@ -4,6 +4,7 @@ import { AuthForm } from "@/components/AuthForm";
 import { AuthSwarmGraph } from "@/components/AuthSwarmGraph";
 import { AmbientRelayVideo } from "@/components/AmbientRelayVideo";
 import { auth } from "@/lib/auth";
+import { isBillingEnabled } from "@/lib/billing/stripe";
 import { MurmurBrand } from "@/components/ui/Brand";
 import {
   ArrowUpRightIcon,
@@ -66,7 +67,9 @@ export default async function SignInPage() {
 
       <section className="murmur-auth-entry" aria-label="Murmur account access">
         <AuthForm />
-        <p className="murmur-auth-footnote">Secure sessions powered by Better Auth. Payments stay on Stripe.</p>
+        <p className="murmur-auth-footnote">
+          Secure sessions powered by Better Auth.{isBillingEnabled() ? " Payments stay on Stripe." : ""}
+        </p>
         <aside className="murmur-auth-terminal" aria-label="Connect Codex or Claude Code through MCP">
           <header>
             <span className="murmur-terminal-lights" aria-hidden="true"><i /><i /><i /></span>

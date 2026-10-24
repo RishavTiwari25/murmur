@@ -7,6 +7,7 @@ import { LiveTokenMeter } from "@/components/LiveTokenMeter";
 import { NewSwarmButton } from "@/components/NewSwarmButton";
 import { auth } from "@/lib/auth";
 import { getUserPlan } from "@/lib/billing/repository";
+import { isBillingEnabled } from "@/lib/billing/stripe";
 import { getMcpTokenStatus } from "@/lib/mcp/service";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -20,6 +21,7 @@ export default async function Home({
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/sign-in");
+  const billingEnabled = isBillingEnabled();
   const [plan, query, mcpStatus] = await Promise.all([
     getUserPlan(session.user.id),
     searchParams,
@@ -34,7 +36,7 @@ export default async function Home({
           <NewSwarmButton />
           <SystemStatus />
           <LiveTokenMeter />
-          <BillingControls plan={plan} />
+          {billingEnabled ? <BillingControls plan={plan} /> : null}
           <McpConnection
             initialStatus={{
               configured: mcpStatus.configured,
@@ -55,7 +57,7 @@ export default async function Home({
         </div>
       </header>
 
-      {query.billing === "success" ? (
+      {!billingEnabled ? null : query.billing === "success" ? (
         <div className="murmur-billing-notice is-success">
           <CheckIcon size={16} />
           <span>Payment received. Pro activates as soon as Stripe confirms the subscription.</span>

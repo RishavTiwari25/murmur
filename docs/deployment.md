@@ -3,13 +3,16 @@
 ## Web adapter (Vercel)
 
 - Set `OPENROUTER_API_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_URL`.
-- Set managed `DATABASE_URL`, `REDIS_URL`, and Kafka TLS/SASL variables. Kafka is
-  required: readiness fails and new runs are rejected when the broker or topic is
-  unavailable.
+- Set managed `DATABASE_URL` and `REDIS_URL`. Kafka is optional: leave
+  `KAFKA_BROKERS` unset to disable it (health reports `disabled`), or set the Kafka
+  TLS/SASL variables below to mirror events to the telemetry service. A configured
+  but unreachable broker only degrades telemetry; runs still start.
 - Use `MURMUR_EXECUTION_MODE=direct` only for a constrained Vercel showcase. For durable
   production execution, set it to `temporal` and configure the reachable Temporal
   address/namespace/task queue plus the always-on Worker below.
-- Set `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, and `STRIPE_WEBHOOK_SECRET`.
+- Optional: set `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, and `STRIPE_WEBHOOK_SECRET`
+  to enable Pro billing. Without them billing routes answer 503 "billing disabled"
+  and the upgrade UI is hidden.
 - Production builds validate required URLs/secrets, then run the idempotent
   `pnpm db:migrate` release step under a PostgreSQL advisory lock before
   `next build`. Preview builds skip Production migrations.
@@ -27,8 +30,8 @@
 If the SASL endpoint uses Aiven's project CA instead of a public Let's Encrypt
 certificate, add the complete PEM value as encrypted `KAFKA_CA_CERT`.
 
-Aiven may power off an inactive free service. A required Kafka dependency means
-Murmur will reject runs until that service is active again.
+Aiven may power off an inactive free service. Murmur keeps serving runs from
+Redis while it is off; only the telemetry mirror is degraded.
 
 ## Background services
 

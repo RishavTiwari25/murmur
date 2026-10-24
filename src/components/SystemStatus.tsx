@@ -6,7 +6,20 @@ import { CheckIcon, ChevronDownIcon, RadioIcon, WarningIcon } from "./ui/Icons";
 interface HealthResponse {
   status: "ready" | "degraded" | "not_ready";
   executionMode: "direct" | "temporal";
-  dependencies: Record<string, { ok: boolean; required?: boolean }>;
+  dependencies: Record<string, DependencyStatus>;
+}
+
+interface DependencyStatus {
+  ok: boolean;
+  required?: boolean;
+  state?: "up" | "down" | "disabled";
+}
+
+/** Row label for one dependency. Exported for unit tests. */
+export function dependencyLabel(dependency: DependencyStatus) {
+  if (dependency.state === "disabled") return "Disabled";
+  if (dependency.ok) return "Ready";
+  return dependency.required === false ? "Degraded" : "Unavailable";
 }
 
 export function SystemStatus() {
@@ -23,6 +36,8 @@ export function SystemStatus() {
 
   // "degraded" still serves runs — only optional telemetry is missing — so the
   // header stays green and the affected row carries the caveat instead.
+  // Dependencies that are intentionally not configured report "disabled" and
+  // never affect the header.
   const ready = health?.status === "ready" || health?.status === "degraded";
   const mode = health?.executionMode ?? "temporal";
   const dependencyLabels: Record<string, string> = {
@@ -47,14 +62,16 @@ export function SystemStatus() {
         <ul>
           {health ? Object.entries(health.dependencies).map(([key, dependency]) => (
             <li key={key}>
-              {dependency.ok ? <CheckIcon size={15} /> : <WarningIcon size={15} />}
+              {dependency.state === "disabled" ? (
+                <span className="murmur-system-off" aria-hidden="true" />
+              ) : dependency.ok ? (
+                <CheckIcon size={15} />
+              ) : (
+                <WarningIcon size={15} />
+              )}
               <span>{dependencyLabels[key] ?? key}</span>
-              <small>
-                {dependency.ok
-                  ? "Ready"
-                  : dependency.required === false
-                    ? "Degraded"
-                    : "Unavailable"}
+              <small className={dependency.state === "disabled" ? "is-disabled" : undefined}>
+                {dependencyLabel(dependency)}
               </small>
             </li>
           )) : <li><span className="murmur-button-loader" />Checking dependencies…</li>}
