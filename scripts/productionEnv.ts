@@ -1,12 +1,15 @@
+import { isModelProviderConfigured, MODEL_PROVIDER_MISSING_MESSAGE } from "../src/lib/swarm/provider";
+
 /**
  * Production environment contract for `pnpm vercel-build`.
  *
- * The minimal deployment needs only OpenRouter, Postgres, Redis, Better Auth,
- * the public app URL and the execution mode. Kafka and Stripe are optional:
- * their variables are validated only when the feature is switched on.
+ * The minimal deployment needs only Postgres, Redis, Better Auth, the public
+ * app URL and the execution mode. Models come from the Vercel AI Gateway, which
+ * authenticates with the deployment's OIDC token, so no model API key is
+ * required on Vercel. Kafka and Stripe are optional: their variables are
+ * validated only when the feature is switched on.
  */
 export const REQUIRED_PRODUCTION_ENV = [
-  "OPENROUTER_API_KEY",
   "DATABASE_URL",
   "REDIS_URL",
   "BETTER_AUTH_SECRET",
@@ -64,6 +67,8 @@ export function validateProductionEnv(env: Env): ProductionEnvSummary {
   if (missing.length > 0) {
     throw new Error(`Missing required Production environment variables: ${missing.join(", ")}`);
   }
+
+  if (!isModelProviderConfigured(env)) throw new Error(MODEL_PROVIDER_MISSING_MESSAGE);
 
   const redis = parseUrl(env, "REDIS_URL");
   if (redis.protocol !== "redis:" && redis.protocol !== "rediss:") {

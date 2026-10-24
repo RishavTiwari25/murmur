@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { REQUIRED_PRODUCTION_ENV, validateProductionEnv } from "./productionEnv";
 
+// VERCEL=1 is injected by every Vercel build and enables the AI Gateway (OIDC).
+const vercel = { VERCEL: "1" };
+
 const minimal = {
-  OPENROUTER_API_KEY: "sk-or-test",
   DATABASE_URL: "postgresql://user:pass@ep-example.neon.tech/murmur?sslmode=require",
   REDIS_URL: "rediss://default:token@example.upstash.io:6379",
   BETTER_AUTH_SECRET: "secret",
@@ -13,7 +15,7 @@ const minimal = {
 
 describe("validateProductionEnv", () => {
   it("accepts the minimal deployment without Kafka or Stripe", () => {
-    expect(validateProductionEnv(minimal)).toEqual({ kafka: false, billing: false });
+    expect(validateProductionEnv({ ...vercel, ...minimal })).toEqual({ kafka: false, billing: false });
   });
 
   it("lists exactly the minimal required variables", () => {
@@ -21,11 +23,11 @@ describe("validateProductionEnv", () => {
   });
 
   it.each(Object.keys(minimal))("rejects a deployment missing %s", (name) => {
-    expect(() => validateProductionEnv({ ...minimal, [name]: "" })).toThrow(name);
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, [name]: "" })).toThrow(name);
   });
 
   it("requires the full Kafka set and TLS only once KAFKA_BROKERS is set", () => {
-    expect(() => validateProductionEnv({ ...minimal, KAFKA_BROKERS: "kafka:9093" })).toThrow(
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, KAFKA_BROKERS: "kafka:9093" })).toThrow(
       /KAFKA_SWARM_EVENTS_TOPIC/,
     );
     const kafka = {
@@ -36,25 +38,32 @@ describe("validateProductionEnv", () => {
       KAFKA_USERNAME: "murmur",
       KAFKA_PASSWORD: "secret",
     };
-    expect(() => validateProductionEnv({ ...kafka, KAFKA_SSL: "0" })).toThrow(
+    expect(() => validateProductionEnv({ ...vercel, ...kafka, KAFKA_SSL: "0" })).toThrow(
       "KAFKA_SSL must be enabled",
     );
-    expect(validateProductionEnv({ ...kafka, KAFKA_SSL: "1" })).toEqual({
+    expect(validateProductionEnv({ ...vercel, ...kafka, KAFKA_SSL: "1" })).toEqual({
       kafka: true,
       billing: false,
     });
   });
 
+  it("needs no model API key on Vercel, but needs a provider elsewhere", () => {
+    expect(() => validateProductionEnv(minimal)).toThrow("No model provider is configured");
+    expect(validateProductionEnv({ ...minimal, AI_GATEWAY_API_KEY: "gw" }).kafka).toBe(false);
+    expect(validateProductionEnv({ ...minimal, OPENROUTER_API_KEY: "sk-or" }).kafka).toBe(false);
+  });
+
   it("ignores KAFKA_SSL when Kafka is disabled", () => {
-    expect(validateProductionEnv({ ...minimal, KAFKA_SSL: "0" }).kafka).toBe(false);
+    expect(validateProductionEnv({ ...vercel, ...minimal, KAFKA_SSL: "0" }).kafka).toBe(false);
   });
 
   it("requires every Stripe variable once any one is set", () => {
-    expect(() => validateProductionEnv({ ...minimal, STRIPE_SECRET_KEY: "sk_live" })).toThrow(
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, STRIPE_SECRET_KEY: "sk_live" })).toThrow(
       /STRIPE_PRO_PRICE_ID, STRIPE_WEBHOOK_SECRET/,
     );
     expect(
       validateProductionEnv({
+        ...vercel,
         ...minimal,
         STRIPE_SECRET_KEY: "sk_live",
         STRIPE_PRO_PRICE_ID: "price_1",
@@ -64,12 +73,12 @@ describe("validateProductionEnv", () => {
   });
 
   it("enforces URL schemes and the execution mode", () => {
-    expect(() => validateProductionEnv({ ...minimal, REDIS_URL: "https://x" })).toThrow("REDIS_URL");
-    expect(() => validateProductionEnv({ ...minimal, DATABASE_URL: "mysql://x" })).toThrow(
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, REDIS_URL: "https://x" })).toThrow("REDIS_URL");
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, DATABASE_URL: "mysql://x" })).toThrow(
       "DATABASE_URL",
     );
-    expect(() => validateProductionEnv({ ...minimal, APP_URL: "http://x" })).toThrow("APP_URL");
-    expect(() => validateProductionEnv({ ...minimal, MURMUR_EXECUTION_MODE: "fast" })).toThrow(
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, APP_URL: "http://x" })).toThrow("APP_URL");
+    expect(() => validateProductionEnv({ ...vercel, ...minimal, MURMUR_EXECUTION_MODE: "fast" })).toThrow(
       "MURMUR_EXECUTION_MODE",
     );
   });

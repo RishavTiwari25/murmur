@@ -7,7 +7,7 @@
 | Next.js adapters | HTTP parsing, auth checks, status codes, SSE framing, durable replay | LLM workflow rules |
 | Application services | launching a run, plan entitlements, orchestration use cases | browser rendering |
 | Swarm domain | plans, DAG waves, worker/validator/synthesis rules | Stripe or HTTP |
-| Infrastructure adapters | PostgreSQL, Redis, Kafka, Temporal, OpenRouter | product policy |
+| Infrastructure adapters | PostgreSQL, Redis, Kafka, Temporal, AI Gateway / OpenRouter | product policy |
 | UI | user intent and event projection | secrets or subscription authority |
 | Go telemetry | Kafka consumption, metrics, the live browser socket | core run execution |
 

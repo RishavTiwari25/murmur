@@ -8,6 +8,7 @@ import {
 } from "@/lib/chat/request";
 import { hasTrustedOrigin, readJsonBody, requestErrorResponse } from "@/lib/http/request";
 import { runText } from "@/lib/swarm/run";
+import { isModelProviderConfigured, MODEL_PROVIDER_MISSING_MESSAGE } from "@/lib/swarm/provider";
 import { enforceRunRateLimit, rateLimitKey, RateLimitError } from "@/lib/swarm/rateLimit";
 import { approximateTokens, boundContext } from "@/lib/swarm/tokenBudget";
 
@@ -31,8 +32,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid chat request." }, { status: 400 });
   }
 
-  if (!process.env.OPENROUTER_API_KEY) {
-    return Response.json({ error: "Chat is not configured on the server." }, { status: 503 });
+  if (!isModelProviderConfigured()) {
+    return Response.json({ error: MODEL_PROVIDER_MISSING_MESSAGE }, { status: 503 });
   }
 
   try {

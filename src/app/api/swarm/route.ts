@@ -4,6 +4,7 @@ import {
   InfrastructureUnavailableError,
 } from "@/lib/swarm/infrastructure";
 import { enforceRunRateLimit, rateLimitKey, RateLimitError } from "@/lib/swarm/rateLimit";
+import { isModelProviderConfigured, MODEL_PROVIDER_MISSING_MESSAGE } from "@/lib/swarm/provider";
 import { getRequestSession } from "@/lib/auth";
 import { getUserPlan } from "@/lib/billing/repository";
 import { maxRunAllowance, runAllowance } from "@/lib/billing/plans";
@@ -45,13 +46,10 @@ export async function POST(req: Request) {
     }
     return Response.json({ error: "Invalid swarm request." }, { status: 400 });
   }
-  if (!process.env.OPENROUTER_API_KEY) {
-    // API keys stay server-side in Next.js route handlers. Never expose this
-    // key from a client component.
-    return new Response(JSON.stringify({ error: "OPENROUTER_API_KEY is not set on the server." }), {
-      status: 500,
-      headers: { "content-type": "application/json" },
-    });
+  if (!isModelProviderConfigured()) {
+    // Provider credentials stay server-side in route handlers. On Vercel the AI
+    // Gateway authenticates with the deployment's OIDC token automatically.
+    return Response.json({ error: MODEL_PROVIDER_MISSING_MESSAGE }, { status: 503 });
   }
 
   try {

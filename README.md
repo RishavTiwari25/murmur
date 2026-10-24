@@ -53,7 +53,7 @@ Next.js route adapter
           ▼
 Temporal Worker → swarm Activity → planner → DAG workers → validators → synthesizer
           │                         │
-          │                         ├─ OpenRouter through Vercel AI SDK
+          │                         ├─ Vercel AI Gateway via AI SDK
           │                         └─ Zod structured-output validation
           ▼
 Redis event stream ──SSE (fallback + durable replay)──▶ Zustand ──▶ React Flow
@@ -130,12 +130,13 @@ Routes authenticate and translate HTTP. `launchSwarm` hides direct-vs-Temporal e
 
 ## Local setup
 
-Requirements: Node.js 20+, pnpm 11, Docker, and an OpenRouter API key. A Firecrawl API key is optional but required for live Researcher web search.
+Requirements: Node.js 20+, pnpm 11, Docker, and model access through the Vercel AI Gateway (an `AI_GATEWAY_API_KEY`, or `vercel env pull` for an OIDC token). OpenRouter is an optional fallback. A Firecrawl API key is optional but required for live Researcher web search.
 
 ```bash
 pnpm install
 cp .env.example .env.local
-# Fill OPENROUTER_API_KEY and BETTER_AUTH_SECRET.
+# Fill BETTER_AUTH_SECRET and AI_GATEWAY_API_KEY (or run `vercel env pull .env.local`
+# to get a VERCEL_OIDC_TOKEN). OPENROUTER_API_KEY is an optional fallback.
 # Fill FIRECRAWL_API_KEY to enable sourced live Researcher searches.
 # Image attachments also need the three CLOUDINARY_* values; Stripe is optional.
 
@@ -165,7 +166,7 @@ Local services:
 | Redis | `localhost:6379` | state, replay, limits |
 | Kafka | `localhost:9092` | event stream |
 
-`pnpm infra:full` builds and starts the Temporal Worker too. It requires a populated `.env.local` because the Worker calls OpenRouter.
+`pnpm infra:full` builds and starts the Temporal Worker too. It requires a populated `.env.local` because the Worker calls the model provider. A Worker running outside Vercel has no OIDC token, so give it `AI_GATEWAY_API_KEY` (or `OPENROUTER_API_KEY`).
 
 ## Pro payments
 
@@ -359,13 +360,28 @@ in-process. Kafka, Stripe, Temporal and the Go telemetry service are all optiona
 
 | Variable | Value |
 | --- | --- |
-| `OPENROUTER_API_KEY` | your OpenRouter key |
 | `DATABASE_URL` | Neon connection string (`postgresql://...?sslmode=require`) |
 | `REDIS_URL` | Upstash Redis TLS URL (`rediss://default:<token>@<host>:6379`) |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | `https://<your-app>.vercel.app` |
 | `APP_URL` | `https://<your-app>.vercel.app` |
 | `MURMUR_EXECUTION_MODE` | `direct` |
+
+No model API key is needed: on Vercel the app calls models through the
+[Vercel AI Gateway](https://vercel.com/docs/ai-gateway), which authenticates with the
+deployment's OIDC token automatically (usage is billed to the Vercel team's AI Gateway
+credits). Default models are cheap and fast and can be overridden per role:
+
+| Role | Default (AI Gateway) | Override |
+| --- | --- | --- |
+| Planner | `google/gemini-2.5-flash` | `MURMUR_PLANNER_MODEL` |
+| Validator | `google/gemini-2.5-flash-lite` | `MURMUR_VALIDATOR_MODEL` |
+| Worker / chat | `google/gemini-2.5-flash-lite` | `MURMUR_WORKER_MODEL` |
+| Synthesizer | `google/gemini-2.5-flash` | `MURMUR_SYNTH_MODEL` |
+| Vision | `google/gemini-2.5-flash-lite` | `MURMUR_VISION_MODEL` |
+
+Each chain falls back to `openai/gpt-5-nano` or another Gemini Flash model on
+rate limits, and then to OpenRouter models only if `OPENROUTER_API_KEY` is set.
 
 Steps:
 
@@ -392,7 +408,7 @@ Vercel can host the Next.js web adapter, but it cannot host the continuously pol
 - managed PostgreSQL, Redis, Kafka, and Temporal Cloud/self-hosted Temporal;
 - one container service for the Temporal Worker;
 - one small container service for Go telemetry;
-- production auth, OpenRouter, Stripe, and infrastructure environment variables;
+- production auth, model provider (AI Gateway key for the off-Vercel Worker), Stripe, and infrastructure environment variables;
 - Cloudinary credentials when image attachments are enabled.
 
 Do not use Compose hostnames or `localhost` from Vercel. Use TLS-enabled managed endpoints and run `pnpm db:migrate` as a release step. See [docs/architecture.md](docs/architecture.md) and [docs/deployment.md](docs/deployment.md).

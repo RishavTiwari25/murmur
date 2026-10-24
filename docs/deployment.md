@@ -2,7 +2,10 @@
 
 ## Web adapter (Vercel)
 
-- Set `OPENROUTER_API_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_URL`.
+- Set `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_URL`. Models go through the
+  Vercel AI Gateway, which authenticates with the deployment's OIDC token, so no model
+  key is needed on Vercel. `OPENROUTER_API_KEY` is an optional fallback. The Temporal
+  Worker runs outside Vercel and needs `AI_GATEWAY_API_KEY` (or the OpenRouter key).
 - Set managed `DATABASE_URL` and `REDIS_URL`. Kafka is optional: leave
   `KAFKA_BROKERS` unset to disable it (health reports `disabled`), or set the Kafka
   TLS/SASL variables below to mirror events to the telemetry service. A configured

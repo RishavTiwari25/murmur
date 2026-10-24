@@ -5,13 +5,15 @@ welcome, including small ones.
 
 ## Getting it running
 
-Requirements: Node.js 20+, pnpm 11, Docker, and an OpenRouter API key. A
+Requirements: Node.js 20+, pnpm 11, Docker, and a Vercel AI Gateway key
+(`AI_GATEWAY_API_KEY`, or `vercel env pull` for an OIDC token). A
 Firecrawl key is optional and only needed for live Researcher search.
 
 ```bash
 pnpm install
 cp .env.example .env.local
-# Fill OPENROUTER_API_KEY and BETTER_AUTH_SECRET (openssl rand -base64 32).
+# Fill AI_GATEWAY_API_KEY and BETTER_AUTH_SECRET (openssl rand -base64 32).
+# OPENROUTER_API_KEY is an optional fallback provider.
 
 pnpm infra:up        # Postgres, Redis, Kafka, Temporal
 pnpm db:migrate
