@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { gatewayModel, openrouterModel } = vi.hoisted(() => ({
+const { gatewayModel, openrouterModel, googleModel } = vi.hoisted(() => ({
   gatewayModel: vi.fn((id: string) => ({ provider: "gateway", id })),
   openrouterModel: vi.fn((id: string) => ({ provider: "openrouter", id })),
+  googleModel: vi.fn((id: string) => ({ provider: "google", id })),
 }));
 vi.mock("ai", () => ({ createGateway: () => gatewayModel }));
 vi.mock("@openrouter/ai-sdk-provider", () => ({ createOpenRouter: () => openrouterModel }));
+vi.mock("@ai-sdk/google", () => ({ createGoogleGenerativeAI: () => googleModel }));
 
 const fetchMock = vi.fn();
 
@@ -16,6 +18,7 @@ beforeEach(() => {
     "VERCEL_OIDC_TOKEN",
     "AI_GATEWAY_API_KEY",
     "OPENROUTER_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
     "MURMUR_PLANNER_MODEL",
     "MURMUR_WORKER_MODEL",
     "MURMUR_DISABLE_AI_GATEWAY",
@@ -33,6 +36,26 @@ afterEach(() => {
 });
 
 describe("model provider selection", () => {
+  it("puts direct Gemini models first when a Google key is set, with the gateway after", async () => {
+    vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "g-key");
+    vi.stubEnv("VERCEL", "1");
+    const { chainFor, model, isModelProviderConfigured } = await import("./models");
+    expect(isModelProviderConfigured()).toBe(true);
+    const chain = await chainFor("worker");
+    expect(chain[0]).toBe("google:gemini-3.5-flash-lite");
+    expect(chain).toContain("google/gemini-2.5-flash-lite");
+    expect(chain.indexOf("google/gemini-2.5-flash-lite")).toBeGreaterThan(chain.indexOf("google:gemini-3.1-flash-lite"));
+    expect(model("google:gemini-3.5-flash")).toEqual({ provider: "google", id: "gemini-3.5-flash" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("applies MURMUR_<ROLE>_MODEL to the Gemini chain head", async () => {
+    vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "g-key");
+    vi.stubEnv("MURMUR_PLANNER_MODEL", "gemini-pro-latest");
+    const { chainFor } = await import("./models");
+    expect((await chainFor("planner"))[0]).toBe("google:gemini-pro-latest");
+  });
+
   it("treats Vercel, an OIDC token, or a gateway key as a configured AI Gateway", async () => {
     const { isGatewayConfigured, isModelProviderConfigured } = await import("./provider");
     expect(isModelProviderConfigured()).toBe(false);

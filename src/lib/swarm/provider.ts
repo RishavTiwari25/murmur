@@ -4,7 +4,8 @@
  *
  * AI Gateway counts as configured on Vercel (VERCEL / VERCEL_OIDC_TOKEN, where
  * the deployment's OIDC token authenticates automatically) or with an explicit
- * AI_GATEWAY_API_KEY. OpenRouter is configured only by OPENROUTER_API_KEY.
+ * AI_GATEWAY_API_KEY. OpenRouter is configured only by OPENROUTER_API_KEY, and
+ * direct Google Gemini (free tier) only by GOOGLE_GENERATIVE_AI_API_KEY.
  */
 type Env = Record<string, string | undefined>;
 
@@ -15,14 +16,18 @@ export function isGatewayConfigured(env: Env = process.env) {
   );
 }
 
+export function isGoogleConfigured(env: Env = process.env) {
+  return Boolean(env.GOOGLE_GENERATIVE_AI_API_KEY?.trim());
+}
+
 export function isOpenRouterConfigured(env: Env = process.env) {
   return Boolean(env.OPENROUTER_API_KEY?.trim());
 }
 
 /** True when at least one model provider can serve requests. */
 export function isModelProviderConfigured(env: Env = process.env) {
-  return isGatewayConfigured(env) || isOpenRouterConfigured(env);
+  return isGoogleConfigured(env) || isGatewayConfigured(env) || isOpenRouterConfigured(env);
 }
 
 export const MODEL_PROVIDER_MISSING_MESSAGE =
-  "No model provider is configured. Deploy on Vercel (AI Gateway via OIDC), or set AI_GATEWAY_API_KEY or OPENROUTER_API_KEY.";
+  "No model provider is configured. Deploy on Vercel (AI Gateway via OIDC), or set GOOGLE_GENERATIVE_AI_API_KEY, AI_GATEWAY_API_KEY or OPENROUTER_API_KEY.";

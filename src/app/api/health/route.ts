@@ -1,7 +1,7 @@
 import { DISABLED_DEPENDENCY, getInfrastructureHealth } from "@/lib/swarm/infrastructure";
 import { pingDatabase } from "@/lib/database";
 import { buildHealthReport } from "@/lib/healthReport";
-import { isGatewayConfigured, isOpenRouterConfigured } from "@/lib/swarm/provider";
+import { isGatewayConfigured, isGoogleConfigured, isOpenRouterConfigured } from "@/lib/swarm/provider";
 import { getExecutionMode, pingTemporal } from "@/lib/temporal/client";
 
 export const runtime = "nodejs";
@@ -26,8 +26,10 @@ export async function GET() {
     postgres,
     temporal,
   });
-  const modelProvider = isGatewayConfigured()
-    ? "ai-gateway"
+  const modelProvider = isGoogleConfigured()
+    ? "google"
+    : isGatewayConfigured()
+      ? "ai-gateway"
     : isOpenRouterConfigured()
       ? "openrouter"
       : "none";

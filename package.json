@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
+    "@ai-sdk/google": "^3.0.138",
     "@modelcontextprotocol/sdk": "1.29.0",
     "@next/env": "16.2.7",
     "@openrouter/ai-sdk-provider": "^2.9.0",

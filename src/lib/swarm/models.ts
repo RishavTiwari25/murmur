@@ -1,9 +1,11 @@
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createGateway, type LanguageModel } from "ai";
-import { isGatewayConfigured, isOpenRouterConfigured } from "./provider";
+import { isGatewayConfigured, isGoogleConfigured, isOpenRouterConfigured } from "./provider";
 
 export {
   isGatewayConfigured,
+  isGoogleConfigured,
   isModelProviderConfigured,
   isOpenRouterConfigured,
   MODEL_PROVIDER_MISSING_MESSAGE,
@@ -20,13 +22,23 @@ export type Role = "planner" | "validator" | "worker" | "synthesizer" | "vision"
  * `vercel env pull`. OpenRouter is an optional fallback, used only when
  * OPENROUTER_API_KEY is set. Chain entries for OpenRouter carry an
  * `openrouter:` prefix; every other id is an AI Gateway model id.
+ *
+ * When GOOGLE_GENERATIVE_AI_API_KEY is set, Gemini is called directly (free
+ * tier, no card needed) and those models lead every chain with a `google:`
+ * prefix; the gateway and OpenRouter chains follow as fallbacks.
  */
 export const OPENROUTER_PREFIX = "openrouter:";
+export const GOOGLE_PREFIX = "google:";
 
 let gatewayProvider: ReturnType<typeof createGateway> | null = null;
 let openrouterProvider: ReturnType<typeof createOpenRouter> | null = null;
+let googleProvider: ReturnType<typeof createGoogleGenerativeAI> | null = null;
 
 export function model(id: string): LanguageModel {
+  if (id.startsWith(GOOGLE_PREFIX)) {
+    googleProvider ??= createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY });
+    return googleProvider(id.slice(GOOGLE_PREFIX.length));
+  }
   if (id.startsWith(OPENROUTER_PREFIX)) {
     openrouterProvider ??= createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY });
     return openrouterProvider(id.slice(OPENROUTER_PREFIX.length));
@@ -46,6 +58,17 @@ const GATEWAY_DEFAULTS: Record<Role, string[]> = {
   worker: ["google/gemini-2.5-flash-lite", "openai/gpt-5-nano"],
   synthesizer: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
   vision: ["google/gemini-2.5-flash-lite", "google/gemini-2.5-flash"],
+};
+
+// Direct Gemini defaults (checked against the Gemini API model list on
+// 2026-10-25; the 2.5 models are closed to new keys). Flash-Lite carries the
+// high-volume roles because the free tier is rate-limited per model.
+const GOOGLE_DEFAULTS: Record<Role, string[]> = {
+  planner: ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.5-flash-lite"],
+  validator: ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite"],
+  worker: ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite"],
+  synthesizer: ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.5-flash-lite"],
+  vision: ["gemini-3.5-flash-lite", "gemini-3.5-flash"],
 };
 
 // Preferred paid OpenRouter model — used only when the OpenRouter key has credit.
@@ -151,19 +174,24 @@ async function openRouterChain(role: Role, override?: string): Promise<string[]>
  * primary provider's chain.
  */
 export async function chainFor(role: Role): Promise<string[]> {
+  const google = isGoogleConfigured();
   const gateway = isGatewayConfigured();
   const openrouter = isOpenRouterConfigured();
   const override = envOverride(role);
   const chain: string[] = [];
 
+  if (google) {
+    const ids = [...(override ? [override] : []), ...GOOGLE_DEFAULTS[role]];
+    chain.push(...ids.map((id) => `${GOOGLE_PREFIX}${id}`));
+  }
   if (gateway) {
-    chain.push(...(override ? [override] : []), ...GATEWAY_DEFAULTS[role]);
+    chain.push(...(override && !google ? [override] : []), ...GATEWAY_DEFAULTS[role]);
   }
   if (openrouter) {
-    const ids = await openRouterChain(role, gateway ? undefined : override);
+    const ids = await openRouterChain(role, gateway || google ? undefined : override);
     chain.push(...ids.map((id) => `${OPENROUTER_PREFIX}${id}`));
   }
-  if (!gateway && !openrouter) {
+  if (!google && !gateway && !openrouter) {
     // No provider is configured; still return the gateway defaults so the call
     // fails with the provider's own authentication error rather than an empty chain.
     chain.push(...(override ? [override] : []), ...GATEWAY_DEFAULTS[role]);
